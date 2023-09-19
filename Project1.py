@@ -27,7 +27,7 @@ learning_rate=0.001
 #samples, labels=next(examples)
 #print(samples.shape, labels.shape)
 
-class LogDataset(Dataset):
+class LogDataset(Dataset): 
     def __init__(self):
         xy=pandas.read_csv('./data/Wednesday_wh.csv')
         #y=torch.from_numpy(xy[:, -1]) #Take last col
