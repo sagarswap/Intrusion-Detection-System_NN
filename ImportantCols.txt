@@ -1,0 +1,25 @@
+ACK Flag Count -BB
+Active Min - CB
+Active Mean - BY
+Average Packet Size - BG
+Bwd IAT Min - AJ
+Bwd IAT Mean - AG
+Bwd Packet Length Min - R
+Bwd Packet Length Std - T
+Bwd Packets/s - AR
+Fwd Packet Len Mean - O
+Fwd IAT Mean - AB
+Fwd IAT Min - AE
+Fwd PSH Flags - AK
+Fwd Packets/s - AQ
+Flow Duration - H
+Flow IAT Mean - W
+Flow IAT Std - X
+Flow IAT Min - Z
+Init Win F. Bytes - BU
+PSH Flag Count - BA
+SYN Flag Count - AY
+Subflow Fwd Bytes - BR
+Total Lenth of Fwd Packets - K
+
+ACK Flag Count, Active Min, Active Mean, Average Packet Size, Bwd IAT Min, Bwd IAT Mean, Bwd Packet Length Min, Bwd Packet Length Std, Bwd Packets/s, Fwd Packet Len Mean, Fwd IAT Mean, Fwd IAT Min, Fwd PSH Flags, Fwd Packets/s, Flow Duration, Flow IAT Mean, Flow IAT Std, Flow IAT Min, Init_Win_bytes_forward, PSH Flag Count, SYN Flag Count, Subflow Fwd Bytes, Total Lenth of Fwd Packets
