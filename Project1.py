@@ -10,28 +10,19 @@ import pandas
 device=torch.device('cpu')
 
 #hyper parameters
-input_size=76
-hidden_size=100
+input_size=23
+hidden_size=50
 num_classes=6
-num_epochs=20
+num_epochs=10
 batch_size=100
 learning_rate=0.001
 
 #MNIST
-
-
-#train_loader=torch.utils.data.DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
-#test_loader=torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False)
-
-#examples=iter(train_loader)
-#samples, labels=next(examples)
-#print(samples.shape, labels.shape)
-
-class LogDataset(Dataset): 
+class LogDatasetTrain(Dataset): 
     def __init__(self):
-        xy=pandas.read_csv('./data/Wednesday_wh.csv')
-        #y=torch.from_numpy(xy[:, -1]) #Take last col
-        #x=torch.from_numpy(xy[:, :-1]) #Take all but the last col
+        xy=np.loadtxt("./data/train_data.csv", delimiter=",", dtype=np.float32, skiprows=1)
+        self.y=torch.from_numpy(xy[:, -6]) #Take last col
+        self.x=torch.from_numpy(xy[:, :-6]) #Take all but the last col
         self.n_samples = xy.shape[0]
 
     def __getitem__(self, index):
@@ -39,6 +30,24 @@ class LogDataset(Dataset):
     
     def __len__(self):
         return self.n_samples
+    
+class LogDatasetTest(Dataset): 
+    def __init__(self):
+        xy=np.loadtxt("./data/test_data.csv", delimiter=",", dtype=np.float32, skiprows=1)
+        self.y=torch.from_numpy(xy[:, -6]) #Take last col
+        self.x=torch.from_numpy(xy[:, :-6]) #Take all but the last col
+        self.n_samples = xy.shape[0]
+
+    def __getitem__(self, index):
+        return self.x[index], self.y[index]
+    
+    def __len__(self):
+        return self.n_samples
+    
+train_data=LogDatasetTrain()
+test_data=LogDatasetTest()
+train_loader=torch.utils.data.DataLoader(dataset=train_data, batch_size=batch_size, shuffle=True)
+test_loader=torch.utils.data.DataLoader(dataset=test_data, batch_size=batch_size, shuffle=False)
 
 class NeuralNet(nn.Module):
     def __init__(self, input_size, hidden_size, num_classes):
@@ -53,25 +62,24 @@ class NeuralNet(nn.Module):
         out=self.l2(out)
         return out
     
-#model=NeuralNet(input_size, hidden_size, num_classes)
-dataset=LogDataset()
-first_data=dataset[0]
-features, labels=first_data
-print(features, labels)
+model=NeuralNet(input_size, hidden_size, num_classes)
 #loss and optimizer
-#criterion=nn.CrossEntropyLoss()
-#optimizer=torch.optim.Adam(model.parameters(), lr=learning_rate)
+criterion=nn.CrossEntropyLoss()
+optimizer=torch.optim.Adam(model.parameters(), lr=learning_rate)
 
 #training loop
-#n_total_steps=len(train_loader)
+n_total_steps=len(train_loader)
 for epoch in range(num_epochs):
-    for i, (images, labels) in enumerate(train_loader):
-        images=images.reshape(-1, 28*28).to(device)
-        labels=labels.to(device)
+    for i, (x_tr, y_tr) in enumerate(train_loader):
 
         #forward
-        outputs=model(images)
-        loss=criterion(outputs, labels)
+        y_pred=model(x_tr)
+        #print(y_pred)
+        #print(y_tr)
+        #print(type(y_pred[0]))
+        #print(type(y_tr[0]))
+        y_tr=y_tr.type(torch.LongTensor)
+        loss=criterion(y_pred, y_tr)
 
         #backwards
         optimizer.zero_grad()
@@ -86,10 +94,11 @@ with torch.no_grad():
     n_correct=0
     n_samples=0
     for images, labels in test_loader:
-        images=images.reshape(-1, 28*28).to(device)
+        images=images.to(device)
         labels=labels.to(device)
         outputs = model(images)
-
+        print(predicictions)
+        print(labels)
         _, predicictions = torch.max(outputs, 1)
         n_samples += labels.shape[0]
         n_correct += (predicictions==labels).sum().item()
