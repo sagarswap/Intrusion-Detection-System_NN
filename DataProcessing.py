@@ -1,4 +1,6 @@
 import csv
+import pandas as pd
+import random
 
 fields=[]
 rows=[]
@@ -31,8 +33,8 @@ for i in range(no_of_desired_fields):
             indx=1
     if indx==0:
         print(important_fields[i])
-important_fields_index.sort()
 print(important_fields_index)
+
 output=[]
 for i in range(no_of_rows):
     row=[]
@@ -41,9 +43,74 @@ for i in range(no_of_rows):
     output.append(row)
     #print(row)
 
-#print(output)
+ans_ind=len(important_fields_index)-1
+for row in output:
+    if row[ans_ind]=="BENIGN":
+        row.append("1")
+        row.append("0")
+        row.append("0")
+        row.append("0")
+        row.append("0")
+        row.append("0")
+    elif row[ans_ind]=="DoS slowloris":
+        row.append("0")
+        row.append("1")
+        row.append("0")
+        row.append("0")
+        row.append("0")
+        row.append("0")
+    elif row[ans_ind]=="DoS Slowhttptest":
+        row.append("0")
+        row.append("0")
+        row.append("1")
+        row.append("0")
+        row.append("0")
+        row.append("0")
+    elif row[ans_ind]=="DoS Hulk":
+        row.append("0")
+        row.append("0")
+        row.append("0")
+        row.append("1")
+        row.append("0")
+        row.append("0")
+    elif row[ans_ind]=="DoS GoldenEye":
+        row.append("0")
+        row.append("0")
+        row.append("0")
+        row.append("0")
+        row.append("1")
+        row.append("0")
+    elif row[ans_ind]=="Heartbleed":
+        row.append("0")
+        row.append("0")
+        row.append("0")
+        row.append("0")
+        row.append("0")
+        row.append("1")
+    del row[ans_ind]
+del important_fields[ans_ind]
+important_fields.append("BENIGN")
+important_fields.append("DoS slowloris")
+important_fields.append("DoS Slowhttptest")
+important_fields.append("DoS Hulk")
+important_fields.append("DoS GoldenEye")
+important_fields.append("Heartbleed")
 
+train_ind_end=0.9*no_of_rows
+train_data=[]
+test_data=[]
+train_data.append(important_fields)
+test_data.append(important_fields)
+for row in output:
+    if random.choice(range(0, 100))>10:
+        train_data.append(row)
+    else:
+        test_data.append(row)
 
+df1=pd.DataFrame(train_data)
+df1.to_csv('./data/train_data.csv', header=False, index=False)
+df2=pd.DataFrame(test_data)
+df2.to_csv('./data/test_data.csv', header=False, index=False)
 
 
 #print('Field names are:' + ', '.join(field for field in fields))
