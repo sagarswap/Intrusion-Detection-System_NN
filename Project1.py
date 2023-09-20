@@ -1,10 +1,8 @@
 import torch
 import torch.nn as nn
-import torchvision
 import torchvision.transforms as transforms
 import numpy as np
 from torch.utils.data import Dataset, DataLoader
-import pandas
 
 #device config
 device=torch.device('cpu')
@@ -13,7 +11,7 @@ device=torch.device('cpu')
 input_size=23
 hidden_size=50
 num_classes=6
-num_epochs=2
+num_epochs=5
 batch_size=100
 learning_rate=0.001
 
@@ -46,7 +44,6 @@ class LogDatasetTest(Dataset):
     
 train_data=LogDatasetTrain()
 test_data=LogDatasetTest()
-print(test_data.y.shape)
 train_loader=torch.utils.data.DataLoader(dataset=train_data, batch_size=batch_size, shuffle=True)
 test_loader=torch.utils.data.DataLoader(dataset=test_data, batch_size=batch_size, shuffle=False)
 
@@ -97,24 +94,40 @@ with torch.no_grad():
     for images, labels in test_loader:
         outputs = model(images)
         pred=[]
+        ans=[]
         _, predicictions = torch.max(outputs, 1)
+        _, lab = torch.max(labels, 1)
+        for l in labels:
+            if l[0]==1.0:
+                ans.append(0)
+            elif l[1]==1.0:
+                ans.append(1)
+            elif l[2]==1.0:
+                ans.append(2)
+            elif l[3]==1.0:
+                ans.append(3)
+            elif l[4]==1.0:
+                ans.append(4)
+            elif l[5]==1.0:
+                ans.append(5)
+            
         for o in predicictions:
             if o == 0:
-                pred.append([1.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+                pred.append(0)
             elif o == 1:
-                pred.append([0.0, 1.0, 0.0, 0.0, 0.0, 0.0])
+                pred.append(1)
             elif o == 2:
-                pred.append([0.0, 0.0, 1.0, 0.0, 0.0, 0.0])
+                pred.append(2)
             elif o == 3:
-                pred.append([0.0, 0.0, 0.0, 1.0, 0.0, 0.0])
+                pred.append(3)
             elif o == 4:
-                pred.append([0.0, 0.0, 0.0, 0.0, 1.0, 0.0])
+                pred.append(4)
             elif o == 5:
-                pred.append([0.0, 0.0, 0.0, 0.0, 0.0, 1.0])
-        pred=torch.FloatTensor(pred)
+                pred.append(5)
+
+        for i in range(len(ans)):
+            if ans[i]==pred[i]:
+                n_correct+=1
         n_samples += labels.shape[0]
-        n=(pred==labels).sum().item()
-        print(n)
-        n_correct += n/6
     acc=100.0*n_correct/n_samples
     print(f'Accuracy = {acc}')
