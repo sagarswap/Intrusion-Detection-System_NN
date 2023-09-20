@@ -13,7 +13,7 @@ device=torch.device('cpu')
 input_size=23
 hidden_size=50
 num_classes=6
-num_epochs=10
+num_epochs=2
 batch_size=100
 learning_rate=0.001
 
@@ -21,7 +21,7 @@ learning_rate=0.001
 class LogDatasetTrain(Dataset): 
     def __init__(self):
         xy=np.loadtxt("./data/train_data.csv", delimiter=",", dtype=np.float32, skiprows=1)
-        self.y=torch.from_numpy(xy[:, -6]) #Take last col
+        self.y=torch.from_numpy(xy[:, -6:]) #Take last col
         self.x=torch.from_numpy(xy[:, :-6]) #Take all but the last col
         self.n_samples = xy.shape[0]
 
@@ -34,7 +34,7 @@ class LogDatasetTrain(Dataset):
 class LogDatasetTest(Dataset): 
     def __init__(self):
         xy=np.loadtxt("./data/test_data.csv", delimiter=",", dtype=np.float32, skiprows=1)
-        self.y=torch.from_numpy(xy[:, -6]) #Take last col
+        self.y=torch.from_numpy(xy[:, -6:]) #Take last col
         self.x=torch.from_numpy(xy[:, :-6]) #Take all but the last col
         self.n_samples = xy.shape[0]
 
@@ -46,6 +46,7 @@ class LogDatasetTest(Dataset):
     
 train_data=LogDatasetTrain()
 test_data=LogDatasetTest()
+print(test_data.y.shape)
 train_loader=torch.utils.data.DataLoader(dataset=train_data, batch_size=batch_size, shuffle=True)
 test_loader=torch.utils.data.DataLoader(dataset=test_data, batch_size=batch_size, shuffle=False)
 
@@ -74,11 +75,11 @@ for epoch in range(num_epochs):
 
         #forward
         y_pred=model(x_tr)
-        #print(y_pred)
-        #print(y_tr)
+        #print(y_pred.shape)
+        #print(y_tr.shape)
         #print(type(y_pred[0]))
         #print(type(y_tr[0]))
-        y_tr=y_tr.type(torch.LongTensor)
+        y_tr=y_tr.type(torch.FloatTensor)
         loss=criterion(y_pred, y_tr)
 
         #backwards
@@ -94,13 +95,26 @@ with torch.no_grad():
     n_correct=0
     n_samples=0
     for images, labels in test_loader:
-        images=images.to(device)
-        labels=labels.to(device)
         outputs = model(images)
-        print(predicictions)
-        print(labels)
+        pred=[]
         _, predicictions = torch.max(outputs, 1)
+        for o in predicictions:
+            if o == 0:
+                pred.append([1.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+            elif o == 1:
+                pred.append([0.0, 1.0, 0.0, 0.0, 0.0, 0.0])
+            elif o == 2:
+                pred.append([0.0, 0.0, 1.0, 0.0, 0.0, 0.0])
+            elif o == 3:
+                pred.append([0.0, 0.0, 0.0, 1.0, 0.0, 0.0])
+            elif o == 4:
+                pred.append([0.0, 0.0, 0.0, 0.0, 1.0, 0.0])
+            elif o == 5:
+                pred.append([0.0, 0.0, 0.0, 0.0, 0.0, 1.0])
+        pred=torch.FloatTensor(pred)
         n_samples += labels.shape[0]
-        n_correct += (predicictions==labels).sum().item()
+        n=(pred==labels).sum().item()
+        print(n)
+        n_correct += n/6
     acc=100.0*n_correct/n_samples
     print(f'Accuracy = {acc}')

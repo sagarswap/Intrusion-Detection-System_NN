@@ -46,19 +46,19 @@ for i in range(no_of_rows):
 ans_ind=len(important_fields_index)-1
 for row in output:
     if row[ans_ind]=="BENIGN":
-        row.append("1")
-        row.append("0")
-        row.append("0")
-        row.append("0")
-        row.append("0")
-        row.append("0")
+        row.append("1.0")
+        row.append("0.0")
+        row.append("0.0")
+        row.append("0.0")
+        row.append("0.0")
+        row.append("0.0")
     elif row[ans_ind]=="DoS slowloris":
-        row.append("0")
-        row.append("1")
-        row.append("0")
-        row.append("0")
-        row.append("0")
-        row.append("0")
+        row.append("0.0")
+        row.append("1.0")
+        row.append("0.0")
+        row.append("0.0")
+        row.append("0.0")
+        row.append("0.0")
     elif row[ans_ind]=="DoS Slowhttptest":
         row.append("0")
         row.append("0")
