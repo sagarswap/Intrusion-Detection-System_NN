@@ -1,6 +1,7 @@
 import csv
 import pandas as pd
 import random
+from sklearn.model_selection import train_test_split
 
 fields=[]
 rows=[]
@@ -14,7 +15,7 @@ no_of_fields=[]
 no_of_desired_fields=len(important_fields)
 no_of_rows=[]
 
-with open("./data/Wednesday_wh.csv", 'r') as csvfile:
+with open("./data/Wednesday-workingHours.pcap_ISCX.csv", 'r') as csvfile:
     csvreader=csv.reader(csvfile)
     fields = next(csvreader)
     fields=[j.strip() for j in fields]
@@ -96,21 +97,10 @@ important_fields.append("DoS Hulk")
 important_fields.append("DoS GoldenEye")
 important_fields.append("Heartbleed")
 
-train_ind_end=0.9*no_of_rows
-train_data=[]
-test_data=[]
-train_data.append(important_fields)
-test_data.append(important_fields)
-for row in output:
-    if random.choice(range(0, 100))>10:
-        train_data.append(row)
-    else:
-        test_data.append(row)
-
-df1=pd.DataFrame(train_data)
-df1.to_csv('./data/train_data.csv', header=False, index=False)
-df2=pd.DataFrame(test_data)
-df2.to_csv('./data/test_data.csv', header=False, index=False)
+df=pd.DataFrame(output)
+train, test=train_test_split(df, test_size=0.1)
+train.to_csv('./data/train_data.csv', header=False, index=False)
+test.to_csv('./data/test_data.csv', header=False, index=False)
 
 
 #print('Field names are:' + ', '.join(field for field in fields))

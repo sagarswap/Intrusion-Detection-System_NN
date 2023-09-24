@@ -8,36 +8,36 @@ from torch.utils.data import Dataset, DataLoader
 device=torch.device('cpu')
 
 #hyper parameters
-input_size=23
+input_size=17
 hidden_size=100
-num_classes=6
-num_epochs=10
+num_classes=1
+num_epochs=13
 batch_size=300
-learning_rate=0.0001
+learning_rate=0.0002
 
 #MNIST
 class LogDatasetTrain(Dataset): 
     def __init__(self):
-        xy=np.loadtxt("./data/train_data.csv", delimiter=",", dtype=np.float32, skiprows=1)
-        self.y=torch.from_numpy(xy[:, -6:]) #Take last col
-        self.x=torch.from_numpy(xy[:, :-6]) #Take all but the last col
+        xy=np.loadtxt("./data/CorrelationDataTrain.csv", delimiter=",", dtype=np.float32, skiprows=1)
+        self.y=torch.FloatTensor(xy[:, -1:]) #Take last col
+        self.X=torch.FloatTensor(xy[:, :-1]) #Take all but the last col
         self.n_samples = xy.shape[0]
 
     def __getitem__(self, index):
-        return self.x[index], self.y[index]
+        return self.X[index], self.y[index]
     
     def __len__(self):
         return self.n_samples
     
 class LogDatasetTest(Dataset): 
     def __init__(self):
-        xy=np.loadtxt("./data/test_data.csv", delimiter=",", dtype=np.float32, skiprows=1)
-        self.y=torch.from_numpy(xy[:, -6:]) #Take last col
-        self.x=torch.from_numpy(xy[:, :-6]) #Take all but the last col
+        xy=np.loadtxt("./data/CorrelationDataTest.csv", delimiter=",", dtype=np.float32, skiprows=1)
+        self.y=torch.FloatTensor(xy[:, -1:]) #Take last col
+        self.X=torch.FloatTensor(xy[:, :-1]) #Take all but the last col
         self.n_samples = xy.shape[0]
 
     def __getitem__(self, index):
-        return self.x[index], self.y[index]
+        return self.X[index], self.y[index]
     
     def __len__(self):
         return self.n_samples
@@ -69,15 +69,12 @@ optimizer=torch.optim.Adam(model.parameters(), lr=learning_rate)
 n_total_steps=len(train_loader)
 for epoch in range(num_epochs):
     for i, (x_tr, y_tr) in enumerate(train_loader):
-
         #forward
-        y_pred=model(x_tr)
-        #print(y_pred.shape)
-        #print(y_tr.shape)
-        #print(type(y_pred[0]))
-        #print(type(y_tr[0]))
-        y_tr=y_tr.type(torch.FloatTensor)
+        y_pred=model.forward(x_tr)
         loss=criterion(y_pred, y_tr)
+        #print(y_pred)
+        #print(y_tr)
+        #print("Done")
 
         #backwards
         optimizer.zero_grad()
@@ -92,42 +89,12 @@ with torch.no_grad():
     n_correct=0
     n_samples=0
     for images, labels in test_loader:
-        outputs = model(images)
-        pred=[]
-        ans=[]
-        _, predicictions = torch.max(outputs, 1)
-        _, lab = torch.max(labels, 1)
-        for l in labels:
-            if l[0]==1.0:
-                ans.append(0)
-            elif l[1]==1.0:
-                ans.append(1)
-            elif l[2]==1.0:
-                ans.append(2)
-            elif l[3]==1.0:
-                ans.append(3)
-            elif l[4]==1.0:
-                ans.append(4)
-            elif l[5]==1.0:
-                ans.append(5)
-            
-        for o in predicictions:
-            if o == 0:
-                pred.append(0)
-            elif o == 1:
-                pred.append(1)
-            elif o == 2:
-                pred.append(2)
-            elif o == 3:
-                pred.append(3)
-            elif o == 4:
-                pred.append(4)
-            elif o == 5:
-                pred.append(5)
-
-        for i in range(len(ans)):
-            if ans[i]==pred[i]:
+        for i, data in enumerate(images):
+            n_samples+=1
+            y_val=model.forward(data)
+            if y_val>0.5 and labels[i]==1.0:
                 n_correct+=1
-        n_samples += labels.shape[0]
+            elif y_val<0.5 and labels[i]==0.0:
+                n_correct+=1
     acc=100.0*n_correct/n_samples
     print(f'Accuracy = {acc}')
