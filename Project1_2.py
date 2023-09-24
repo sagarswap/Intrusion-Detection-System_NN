@@ -8,7 +8,7 @@ from torch.utils.data import Dataset, DataLoader
 device=torch.device('cpu')
 
 #hyper parameters
-input_size=17
+input_size=16
 hidden_size=100
 num_classes=1
 num_epochs=13
